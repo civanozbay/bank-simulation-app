@@ -1,5 +1,7 @@
 package com.bank.controller;
 
+import com.bank.enums.AccountType;
+import com.bank.model.Account;
 import com.bank.service.AccountService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,5 +20,13 @@ public class AccountController {
     public String getIndex(Model model){
         model.addAttribute("accountList",accountService.listAllAcount());
         return "account/index";
+    }
+
+    @GetMapping("/create-form")
+    public String createForm(Model model){
+        model.addAttribute("account", Account.builder().build());
+        model.addAttribute("accountType", AccountType.values());
+
+        return "account/create-account";
     }
 }
