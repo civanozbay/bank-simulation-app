@@ -1,12 +1,18 @@
 package com.bank.controller;
 
+import com.bank.enums.AccountStatus;
 import com.bank.enums.AccountType;
 import com.bank.model.Account;
+import com.bank.repository.AccountRepository;
 import com.bank.service.AccountService;
+import com.bank.service.impl.AccountServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class AccountController {
@@ -28,5 +34,19 @@ public class AccountController {
         model.addAttribute("accountType", AccountType.values());
 
         return "account/create-account";
+    }
+
+    @PostMapping("/create")
+    public String createAccount(@ModelAttribute("account") Account account){ // i need to get the information from fill out account object to the that method
+
+        accountService.createNewAccount(account.getBalance(),new Date(),account.getAccountType(), account.getUserId());
+
+        return "redirect:/index";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String getDeleteAccount(@PathVariable("id") UUID id){
+        accountService.deleteAccount(id);
+        return "redirect:/index";
     }
 }
