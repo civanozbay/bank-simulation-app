@@ -1,11 +1,15 @@
 package com.bank.controller;
 
+import com.bank.model.Account;
 import com.bank.model.Transaction;
 import com.bank.service.AccountService;
 import com.bank.service.TransactionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Date;
+import java.util.UUID;
 
 @Controller
 public class TransactionController {
@@ -18,7 +22,7 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @GetMapping("/transfer")
+    @GetMapping("/make-transfer")
     public String transaction(Model model){
         // we need all accounts to provide them as sender, receiver
         model.addAttribute("accounts",accountService.listAllAcount());
@@ -29,4 +33,22 @@ public class TransactionController {
 
         return "/transaction/make-transfer";
     }
-}
+
+    @PostMapping("/transfer")
+        public String postMakeTransfer(@ModelAttribute("transaction") Transaction transaction,Model model){
+
+    //I have UUID but I need to provide Account to make transfer method.
+        Account sender = accountService.retrieveById(transaction.getSender());
+        Account receiver = accountService.retrieveById(transaction.getReceiver());
+
+        transactionService.makeTransfer(sender,receiver,transaction.getAmount(),new Date(),transaction.getMessage());
+
+        return "redirect:/make-transfer";}
+
+
+    @GetMapping("/account-transaction/{id}")
+    public String accountTransaction(@PathVariable("id") UUID uuid,Model model){
+        model.addAttribute("transactions",transactionService.findTransactionListById(uuid));
+        return "/transaction/transactions";
+    }
+    }

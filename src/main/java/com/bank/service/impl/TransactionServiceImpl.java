@@ -17,6 +17,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Component
 public class TransactionServiceImpl implements TransactionService {
     @Value("${under_construction}")
@@ -105,5 +107,10 @@ public class TransactionServiceImpl implements TransactionService {
         // we want to list latest 10 transaction
         return transactionRepository.lastTransaction();
 
+    }
+
+    @Override
+    public List<Transaction> findTransactionListById(UUID uuid) {
+        return transactionRepository.getTransactionListById(uuid);
     }
 }
