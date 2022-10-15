@@ -6,8 +6,10 @@ import com.bank.service.AccountService;
 import com.bank.service.TransactionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.UUID;
 
@@ -35,7 +37,15 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer")
-        public String postMakeTransfer(@ModelAttribute("transaction") Transaction transaction,Model model){
+        public String postMakeTransfer(@Valid @ModelAttribute("transaction") Transaction transaction, BindingResult bindingResult, Model model){
+
+        if(bindingResult.hasErrors()){
+
+            model.addAttribute("accounts",accountService.listAllAcount());
+            return "transaction/make-transfer";
+        }
+
+
 
     //I have UUID but I need to provide Account to make transfer method.
         Account sender = accountService.retrieveById(transaction.getSender());
