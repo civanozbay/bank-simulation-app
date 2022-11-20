@@ -1,7 +1,7 @@
 package com.bank.service;
 
+import com.bank.dto.AccountDTO;
 import com.bank.enums.AccountType;
-import com.bank.model.Account;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -10,10 +10,10 @@ import java.util.UUID;
 
 public interface AccountService {
 
-    Account createNewAccount(BigDecimal balance, Date creationDate, AccountType accountType, Long userId);
-    List<Account> listAllAcount();
+    AccountDTO createNewAccount(BigDecimal balance, Date creationDate, AccountType accountType, Long userId);
+    List<AccountDTO> listAllAcount();
 
-    void deleteAccount(UUID id);
+    void deleteAccount(Long id);
 
-    Account retrieveById(UUID id);
+    AccountDTO retrieveById(Long id);
 }

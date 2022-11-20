@@ -1,11 +1,8 @@
 package com.bank.controller;
 
-import com.bank.enums.AccountStatus;
+import com.bank.dto.AccountDTO;
 import com.bank.enums.AccountType;
-import com.bank.model.Account;
-import com.bank.repository.AccountRepository;
 import com.bank.service.AccountService;
-import com.bank.service.impl.AccountServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -13,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -32,19 +28,19 @@ public class AccountController {
 
     @GetMapping("/create-form")
     public String createForm(Model model){
-        model.addAttribute("account", Account.builder().build());
+        model.addAttribute("account", new AccountDTO());
         model.addAttribute("accountType", AccountType.values());
 
         return "account/create-account";
     }
 
     @PostMapping("/create")
-    public String createAccount(@Valid @ModelAttribute("account") Account account, BindingResult bindingResult,Model model){ // i need to get the information from fill out account object to the that method
+    public String createAccount(@Valid @ModelAttribute("account") AccountDTO accountDTO, BindingResult bindingResult, Model model){ // i need to get the information from fill out account object to the that method
         if(bindingResult.hasErrors()){
             model.addAttribute("accountType", AccountType.values());
             return "account/create-account";
         }
-        accountService.createNewAccount(account.getBalance(),new Date(),account.getAccountType(), account.getUserId());
+        accountService.createNewAccount(accountDTO.getBalance(),new Date(), accountDTO.getAccountType(), accountDTO.getUserId());
 
         return "redirect:/index";
     }
