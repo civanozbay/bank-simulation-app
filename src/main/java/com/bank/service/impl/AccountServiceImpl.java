@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,12 +43,23 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void deleteAccount(Long id) {
-        AccountDTO accountDTO = accountRepository.findBy(id);
-        accountDTO.setAccountStatus(AccountStatus.DELETED);
+        Account byId = accountRepository.findById(id).get();
+        byId.setAccountStatus(AccountStatus.DELETED);
+        accountRepository.save(byId);
     }
 
     @Override
     public AccountDTO retrieveById(Long id) {
-        return accountRepository.findBy(id);
+        Optional<Account> byId = accountRepository.findById(id);
+        return mapperUtil.convert(byId, new AccountDTO());
+    }
+
+    @Override
+    public List<AccountDTO> listAllActiveAccounts() {
+        List<Account> byAccountStatus_active = accountRepository.findByAccountStatus(AccountStatus.ACTIVE);
+
+        return byAccountStatus_active.stream().
+                map(account -> mapperUtil.convert(account,new AccountDTO())).
+                collect(Collectors.toList());
     }
 }
