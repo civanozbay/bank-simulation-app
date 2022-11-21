@@ -1,6 +1,7 @@
 package com.bank.service.impl;
 
 import com.bank.dto.AccountDTO;
+import com.bank.entity.Account;
 import com.bank.enums.AccountStatus;
 import com.bank.enums.AccountType;
 import com.bank.mapper.MapperUtil;
@@ -26,9 +27,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public AccountDTO createNewAccount(BigDecimal balance, Date creationDate, AccountType accountType, Long userId) {
-        AccountDTO accountDTO = new AccountDTO();
-        return accountRepository.save(accountDTO);
+    public void createNewAccount(AccountDTO accountDTO) {
+        accountDTO.setAccountStatus(AccountStatus.ACTIVE);
+        accountDTO.setCreationDate(new Date());
+        accountRepository.save(mapperUtil.convert(accountDTO,new Account()));
     }
 
     @Override
