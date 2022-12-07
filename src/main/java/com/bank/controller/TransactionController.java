@@ -30,7 +30,7 @@ public class TransactionController {
         // we need empty transaction object to get info from UI
         model.addAttribute("transaction", new TransactionDTO());
         // we need list of last 10 transactions
-        model.addAttribute("lastTransactions",transactionService.transactionsList());
+        model.addAttribute("lastTransactions",transactionService.lastTransactionsList());
 
         return "/transaction/make-transfer";
     }

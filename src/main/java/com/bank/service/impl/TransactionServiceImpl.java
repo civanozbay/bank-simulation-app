@@ -7,16 +7,20 @@ import com.bank.exception.AccountOwnershipException;
 import com.bank.exception.BadRequestException;
 import com.bank.exception.BalanceNotSufficientException;
 import com.bank.exception.UnderConstructionException;
+import com.bank.mapper.MapperUtil;
+import com.bank.mapper.TransactionMapper;
 import com.bank.repository.AccountRepository;
 import com.bank.repository.TransactionRepository;
 import com.bank.service.TransactionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transaction;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class TransactionServiceImpl implements TransactionService {
@@ -24,10 +28,14 @@ public class TransactionServiceImpl implements TransactionService {
     private boolean underConstruction;
     AccountRepository accountRepository;
     TransactionRepository transactionRepository;
+    TransactionMapper transactionMapper;
+    MapperUtil mapperUtil;
 
-    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository, TransactionMapper transactionMapper,MapperUtil mapperUtil) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
+        this.transactionMapper = transactionMapper;
+        this.mapperUtil= mapperUtil;
     }
 
     @Override
@@ -98,13 +106,14 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public List<TransactionDTO> findAllTransaction() {
-        return transactionRepository.findAll();
+        return transactionRepository.findAll().stream().map(transaction -> mapperUtil.convert(transaction,new TransactionDTO())).collect(Collectors.toList());
     }
 
     @Override
-    public List<TransactionDTO> transactionsList() {
+    public List<TransactionDTO> lastTransactionsList() {
         // we want to list latest 10 transaction
-        return transactionRepository.lastTransaction();
+        return transactionRepository.last10Transaction().stream().map(transaction -> mapperUtil.convert(transaction,new TransactionDTO()))
+                .collect(Collectors.toList());
 
     }
 
