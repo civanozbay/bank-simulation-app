@@ -62,4 +62,9 @@ public class AccountServiceImpl implements AccountService {
                 map(account -> mapperUtil.convert(account,new AccountDTO())).
                 collect(Collectors.toList());
     }
+
+    @Override
+    public void updateAccount(AccountDTO accountDTO) {
+        accountRepository.save(mapperUtil.convert(accountDTO,new Account()));
+    }
 }

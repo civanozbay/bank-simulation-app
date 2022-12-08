@@ -2,6 +2,7 @@ package com.bank.service.impl;
 
 import com.bank.dto.AccountDTO;
 import com.bank.dto.TransactionDTO;
+import com.bank.entity.Transaction;
 import com.bank.enums.AccountType;
 import com.bank.exception.AccountOwnershipException;
 import com.bank.exception.BadRequestException;
@@ -11,11 +12,11 @@ import com.bank.mapper.MapperUtil;
 import com.bank.mapper.TransactionMapper;
 import com.bank.repository.AccountRepository;
 import com.bank.repository.TransactionRepository;
+import com.bank.service.AccountService;
 import com.bank.service.TransactionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transaction;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -27,19 +28,21 @@ public class TransactionServiceImpl implements TransactionService {
     @Value("${under_construction}")
     private boolean underConstruction;
     AccountRepository accountRepository;
+    AccountService accountService;
     TransactionRepository transactionRepository;
     TransactionMapper transactionMapper;
     MapperUtil mapperUtil;
 
-    public TransactionServiceImpl(AccountRepository accountRepository, TransactionRepository transactionRepository, TransactionMapper transactionMapper,MapperUtil mapperUtil) {
+    public TransactionServiceImpl(AccountRepository accountRepository,AccountService accountService, TransactionRepository transactionRepository, TransactionMapper transactionMapper,MapperUtil mapperUtil) {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.transactionMapper = transactionMapper;
         this.mapperUtil= mapperUtil;
+        this.accountService = accountService;
     }
 
     @Override
-    public TransactionDTO makeTransfer(AccountDTO sender, AccountDTO receiver, BigDecimal amount, Date creationDate, String message) {
+    public void makeTransfer(AccountDTO sender, AccountDTO receiver, BigDecimal amount, Date creationDate, String message) {
         if (!underConstruction) {
             validateAccount(sender, receiver);
             checkAccountOwnership(sender, receiver);
@@ -48,8 +51,8 @@ public class TransactionServiceImpl implements TransactionService {
         after all validations are completed, and money is transferred, we need to create Transaction object and save/return it
          */
             //please create needed classes/ methods for this step, save the transactions.
-            TransactionDTO transactionDTO = new TransactionDTO();
-            return transactionRepository.save(transactionDTO);
+            TransactionDTO transactionDTO = new TransactionDTO(sender,receiver,amount,message,creationDate);
+            transactionRepository.save(transactionMapper.convertToEntity(transactionDTO));
         }else {
             throw new UnderConstructionException("App is under construction, try again later");
         }
@@ -60,6 +63,16 @@ public class TransactionServiceImpl implements TransactionService {
         if(checkSenderBalance(sender,amount)){
             sender.setBalance(sender.getBalance().subtract(amount));
             receiver.setBalance(receiver.getBalance().add(amount));
+
+            AccountDTO senderAcc = accountService.retrieveById(sender.getId());
+            senderAcc.setBalance(sender.getBalance());
+
+            accountService.updateAccount(senderAcc);
+            AccountDTO receiverAcc = accountService.retrieveById(receiver.getId());
+            receiverAcc.setBalance(receiver.getBalance());
+
+            accountService.updateAccount(receiverAcc);
+
         }else{
             throw new BalanceNotSufficientException("Balance is not enough for this transfer");
         }
@@ -100,8 +113,8 @@ public class TransactionServiceImpl implements TransactionService {
         
     }
 
-    private void findAccountById(Long id) {
-        accountRepository.findBy(id);
+    private AccountDTO findAccountById(Long id) {
+        return accountService.retrieveById(id);
     }
 
     @Override
@@ -118,7 +131,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<TransactionDTO> findTransactionListById(Long uuid) {
-        return transactionRepository.getTransactionListById(uuid);
+    public List<TransactionDTO> findTransactionListById(Long id) {
+
+        return transactionRepository.findTransactionListById(id).stream().
+                map(transaction -> mapperUtil.convert(transaction,new TransactionDTO())).collect(Collectors.toList());
     }
 }
