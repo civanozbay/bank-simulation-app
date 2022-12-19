@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class TransactionMapper {
+
     private final ModelMapper modelMapper;
 
     public TransactionMapper(ModelMapper modelMapper) {
@@ -14,12 +15,12 @@ public class TransactionMapper {
     }
 
     public TransactionDTO convertToDTO(Transaction entity){
-        return modelMapper.map(entity, TransactionDTO.class);
+
+        return modelMapper.map(entity,TransactionDTO.class);
     }
 
-    public Transaction convertToEntity(TransactionDTO transactionDTO){
-        return modelMapper.map(transactionDTO, Transaction.class);
-    }
+    public Transaction  convertToEntity(TransactionDTO dto){
 
+        return modelMapper.map(dto, Transaction.class);
+    }
 }
-

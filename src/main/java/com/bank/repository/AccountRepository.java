@@ -10,11 +10,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Repository
 public interface AccountRepository extends JpaRepository<Account,Long> {
 
-    List<Account> findByAccountStatus(AccountStatus accountStatus);
+    List<Account> findAllByAccountStatus(AccountStatus accountStatus);
 
 }

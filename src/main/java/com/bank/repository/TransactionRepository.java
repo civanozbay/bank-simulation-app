@@ -1,22 +1,23 @@
 package com.bank.repository;
 
-import com.bank.dto.TransactionDTO;
+import com.bank.entity.Transaction;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
-import javax.transaction.Transaction;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction,Long> {
-    @Query(value = "SELECT * FROM transactions t order by creation_date DESC limit 10",nativeQuery = true)
-    List<Transaction> last10Transaction();
-    @Query("SELECT t from Transaction t where t.sender.id=?1 OR t.receiver.id=?1")
+
+    @Query(value = "SELECT * FROM transactions ORDER BY creation_date DESC LIMIT 10",nativeQuery = true)
+    List<Transaction> findLastTenTransactions();
+
+    @Query("SELECT t FROM Transaction t WHERE t.sender.id = ?1 OR t.receiver.id = ?1")
     List<Transaction> findTransactionListById(Long id);
 }

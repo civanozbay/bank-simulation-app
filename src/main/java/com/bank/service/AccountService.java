@@ -1,6 +1,7 @@
 package com.bank.service;
 
 import com.bank.dto.AccountDTO;
+import com.bank.entity.Account;
 import com.bank.enums.AccountType;
 
 import java.math.BigDecimal;
@@ -10,8 +11,10 @@ import java.util.UUID;
 
 public interface AccountService {
 
+
     void createNewAccount(AccountDTO accountDTO);
-    List<AccountDTO> listAllAcount();
+
+    List<AccountDTO> listAllAccount();
 
     void deleteAccount(Long id);
 

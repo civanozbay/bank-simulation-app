@@ -1,70 +1,87 @@
-package com.bank.service.impl;
+
+package com.cydeo.service.impl;
 
 import com.bank.dto.AccountDTO;
 import com.bank.entity.Account;
 import com.bank.enums.AccountStatus;
-import com.bank.enums.AccountType;
-import com.bank.mapper.MapperUtil;
+import com.bank.mapper.AccountMapper;
 import com.bank.repository.AccountRepository;
 import com.bank.service.AccountService;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
 public class AccountServiceImpl implements AccountService {
-    AccountRepository accountRepository;
-    private final MapperUtil mapperUtil;
 
-    public AccountServiceImpl(MapperUtil mapperUtil,AccountRepository accountRepository) {
+    AccountRepository accountRepository;
+    AccountMapper accountMapper;
+
+    public AccountServiceImpl(AccountRepository accountRepository, AccountMapper accountMapper) {
         this.accountRepository = accountRepository;
-        this.mapperUtil=mapperUtil;
+        this.accountMapper = accountMapper;
     }
 
     @Override
     public void createNewAccount(AccountDTO accountDTO) {
+
+        //we will complete the DTO
+        //convert it to entity and save it to database
         accountDTO.setAccountStatus(AccountStatus.ACTIVE);
         accountDTO.setCreationDate(new Date());
-        accountRepository.save(mapperUtil.convert(accountDTO,new Account()));
+
+        accountRepository.save(accountMapper.convertToEntity(accountDTO));
     }
 
     @Override
-    public List<AccountDTO> listAllAcount() {
-        return accountRepository.findAll().stream().
-                map(account -> mapperUtil.convert(account,new AccountDTO())).
-                collect(Collectors.toList());
+    public List<AccountDTO> listAllAccount() {
+        /*
+            we are getting list of accounts from repo(database)
+            but we need to return list of AccountDTO to controller
+            what we need to do is we will convert Account to AccountDTO
+         */
+        List<Account> accountList = accountRepository.findAll();
+
+        //we are converting list of account to accountDTOs and returning it.
+        return accountList.stream().map(accountMapper::convertToDTO).collect(Collectors.toList());
     }
 
     @Override
     public void deleteAccount(Long id) {
-        Account byId = accountRepository.findById(id).get();
-        byId.setAccountStatus(AccountStatus.DELETED);
-        accountRepository.save(byId);
+        //we need to find correct account based on id we have
+        //change status to DELETED
+        /*
+            find the Account, update the Status to delete
+         */
+        Account account = accountRepository.findById(id).get();
+        account.setAccountStatus(AccountStatus.DELETED);
+
+        accountRepository.save(account);
+
+
     }
 
     @Override
     public AccountDTO retrieveById(Long id) {
-        Optional<Account> byId = accountRepository.findById(id);
-        return mapperUtil.convert(byId, new AccountDTO());
+
+        return accountMapper.convertToDTO(accountRepository.findById(id).get());
     }
 
     @Override
     public List<AccountDTO> listAllActiveAccounts() {
-        List<Account> byAccountStatus_active = accountRepository.findByAccountStatus(AccountStatus.ACTIVE);
+        //we need active accounts from repository
+        List<Account> accountList = accountRepository.findAllByAccountStatus(AccountStatus.ACTIVE);
+        //convert active accounts to accounts dto and return
+        return accountList.stream().map(accountMapper::convertToDTO).collect(Collectors.toList());
 
-        return byAccountStatus_active.stream().
-                map(account -> mapperUtil.convert(account,new AccountDTO())).
-                collect(Collectors.toList());
+
+
     }
 
     @Override
     public void updateAccount(AccountDTO accountDTO) {
-        accountRepository.save(mapperUtil.convert(accountDTO,new Account()));
+        accountRepository.save(accountMapper.convertToEntity(accountDTO));
     }
 }

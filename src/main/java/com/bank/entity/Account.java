@@ -2,10 +2,7 @@ package com.bank.entity;
 
 import com.bank.enums.AccountStatus;
 import com.bank.enums.AccountType;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -14,6 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "accounts")
 @Entity
 public class Account extends BaseEntity{
